@@ -1,35 +1,36 @@
-const gSpreadsheet = require('./google_sheets');
+import GoogleSheets from './google_sheets';
 
 const monthsMap = {
-  'Январь': 1,
-  'Февраль': 2,
-  'Март': 3,
-  'Апрель': 4,
-  'Май': 5,
-  'Июнь': 6,
-  'Июль': 7,
-  'Август': 8,
-  'Сентябрь': 9,
-  'Октябрь': 10,
-  'Ноябрь': 11,
-  'Декабрь': 12,
+  Январь: 1,
+  Февраль: 2,
+  Март: 3,
+  Апрель: 4,
+  Май: 5,
+  Июнь: 6,
+  Июль: 7,
+  Август: 8,
+  Сентябрь: 9,
+  Октябрь: 10,
+  Ноябрь: 11,
+  Декабрь: 12,
 };
 
-class misisParser {
+class MisisParser {
   static parse() {
-    let gs = new gSpreadsheet('1NlUU1ulotC5Kjiz-ctVhzwyAcyEWbK2ZY5eA4Z2PKoQ');
-    return gs.parse().then(items => {
+    const gs = new GoogleSheets('1NlUU1ulotC5Kjiz-ctVhzwyAcyEWbK2ZY5eA4Z2PKoQ');
+    return gs.parse().then((items) => {
       // Var for iterations
-      let currentYear = 2023;
+      const currentYear = 2023;
       let currentMonth = '';
       let currentSubject = '';
-      let events = [];
+      let currentTypeOfCert = '';
+      const events = [];
 
       // Process months
-      let months = items['table']['cols'];
-      for (let i = 0; i < months.length; i++) {
-        if (months[i] && months[i]['label'] !== '') {
-          let t = months[i]['label'].split(' ');
+      const months = items.table.cols;
+      for (let i = 0; i < months.length; i += 1) {
+        if (months[i] && months[i].label !== '') {
+          let t = months[i].label.split(' ');
           t = t[t.length - 1];
           if (monthsMap[t]) {
             currentMonth = monthsMap[t];
@@ -41,10 +42,10 @@ class misisParser {
       // TODO: Check meta [C4:F4]
 
       // Process days
-      let days = items['table']['rows'][2]['c'];
-      for (let i = 0; i < days.length; i++) {
-        if (days[i] && days[i]['v']) {
-          let t = Date.parse(`${currentYear}-${months[i]}-${days[i]['v']} 00:00:00 GMT`);
+      const days = items.table.rows[2].c;
+      for (let i = 0; i < days.length; i += 1) {
+        if (days[i] && days[i].v) {
+          const t = Date.parse(`${currentYear}-${months[i]}-${days[i].v} 00:00:00 GMT`);
           if (t > 1693508400000) {
             // TODO: check for 2024y
             days[i] = t;
@@ -55,26 +56,37 @@ class misisParser {
       }
 
       // Process subjects [C:C]
-      for (let i = 3; i < items['table']['rows'].length; i++) {
+      for (let i = 3; i < items.table.rows.length; i += 1) {
         // Check time in row [F:F]
-        if (items['table']['rows'][i]['c'][5]) {
+        if (items.table.rows[i].c[5]) {
           // Check for present subject title
-          if (items['table']['rows'][i]['c'][2] && items['table']['rows'][i]['c'][2]['v']) {
-            currentSubject = items['table']['rows'][i]['c'][2]['v'].trim();
+          let pair = '';
+          if (items.table.rows[i].c[2] && items.table.rows[i].c[2].v) {
+            currentSubject = items.table.rows[i].c[2].v.trim();
+          }
+
+          if (items.table.rows[i].c[3] && items.table.rows[i].c[3].v) {
+            currentTypeOfCert = items.table.rows[i].c[3].v.trim();
+          }
+
+          if (items.table.rows[i].c[4] && items.table.rows[i].c[4].v) {
+            pair = items.table.rows[i].c[4].v;
           }
 
           // Detect time
-          let time = items['table']['rows'][i]['c'][5]['v'].split(' - ');
-          let start = Date.parse(`Thu, 01 Jan 1970 ${time[0]} GMT+0300`);
-          let end = Date.parse(`Thu, 01 Jan 1970 ${time[1]} GMT+0300`);
+          const time = items.table.rows[i].c[5].v.split(' - ');
+          const start = Date.parse(`Thu, 01 Jan 1970 ${time[0]} GMT+0300`);
+          const end = Date.parse(`Thu, 01 Jan 1970 ${time[1]} GMT+0300`);
 
           // Iterate days
-          for (let j = 7; j < months.length; j++) {
-            if (items['table']['rows'][i]['c'][j] && items['table']['rows'][i]['c'][j]['v']) {
-              let e = {
+          for (let j = 7; j < months.length; j += 1) {
+            if (items.table.rows[i].c[j] && items.table.rows[i].c[j].v) {
+              const e = {
                 start: days[j] + start,
                 end: days[j] + end,
                 subject: currentSubject,
+                pair,
+                typeOfCert: currentTypeOfCert,
               };
               events.push(e);
             }
@@ -86,4 +98,4 @@ class misisParser {
   }
 }
 
-module.exports = misisParser;
+export default MisisParser;
