@@ -1,18 +1,31 @@
 {
-  "name": "misis-shedule",
-  "version": "0.0.0",
+  "name": "misis-googlesheets-parser",
+  "version": "0.0.1",
+  "description": "",
+  "author": "Dmitriy Pervin",
   "private": true,
+  "license": "UNLICENSED",
   "scripts": {
-    "start": "node ./bin/www"
+    "build": "babel src -d dist",
+    "start": "babel-node index.js",
+    "start:dev": "nodemon"
   },
   "dependencies": {
-    "cookie-parser": "~1.4.4",
-    "debug": "~2.6.9",
+    "body-parser": "^1.20.2",
     "express": "~4.16.1",
     "http-errors": "~1.6.3",
-    "ical-generator": "^6.0.0",
-    "ics": "^3.5.0",
-    "morgan": "~1.9.1",
-    "pug": "2.0.0-beta11"
+    "ical-generator": "^6.0.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.23.0",
+    "@babel/core": "^7.23.3",
+    "@babel/node": "^7.22.19",
+    "@babel/preset-env": "^7.23.3",
+    "@babel/register": "^7.22.15",
+    "eslint": "^8.53.0",
+    "eslint-auto-fix": "^1.0.4",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.29.0",
+    "nodemon": "^3.0.1"
   }
 }
