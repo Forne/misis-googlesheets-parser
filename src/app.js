@@ -11,5 +11,6 @@ app.use('/api/google_sheets', routerApiGS);
 app.use('/api/misis', routerApiMisis);
 
 app.listen(3000, () => {
+  // eslint-disable-next-line no-console
   console.log('app is listening to port 3000');
 });
